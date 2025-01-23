@@ -178,5 +178,76 @@ namespace Avalonia.Controls.UnitTests.Shapes
             target.Arrange(new Rect(0, 0, 300, 300));
             Assert.Equal(Matrix.CreateScale(3, 3), target.RenderedGeometry.Transform.Value);
         }
+        
+        [Fact]
+        public void Path_Triggers_Geometry_Invalidation_On_Data_Change()
+        {
+            using var app = UnitTestApplication.Start(TestServices.MockPlatformRenderInterface);
+
+            var target = new Path()
+            {
+                Data = new EllipseGeometry()
+            };
+            
+            var root = new TestRoot(target);
+
+            target.Measure(new Size());
+            Assert.True(target.IsMeasureValid);
+            
+            target.Data = new RectangleGeometry();
+            Assert.False(target.IsMeasureValid);
+            
+            root.Child = null;
+        }
+        
+        [Fact]
+        public void Path_Triggers_Geometry_Invalidation_On_PathGeometry_Figures_Change()
+        {
+            using var app = UnitTestApplication.Start(TestServices.MockPlatformRenderInterface);
+
+            var targetGeometry = new PathGeometry { Figures = [] };
+            var target = new Path()
+            {
+                Data = targetGeometry
+            };
+            
+            var root = new TestRoot(target);
+
+            target.Measure(new Size());
+            Assert.True(target.IsMeasureValid);
+            
+            targetGeometry.Figures.Add(new PathFigure { IsClosed = false, Segments = [] });
+            Assert.False(target.IsMeasureValid);
+            
+            root.Child = null;
+        }
+        
+        [Fact]
+        public void Path_Triggers_Geometry_Invalidation_On_PathGeometry_Segment_Change()
+        {
+            using var app = UnitTestApplication.Start(TestServices.MockPlatformRenderInterface);
+
+            var targetSegment = new PolyLineSegment();
+            var target = new Path()
+            {
+                Data = new PathGeometry
+                {
+                    Figures = [new PathFigure
+                    {
+                        IsClosed = false, Segments = [targetSegment]
+                    }]
+                }
+            };
+            
+            var root = new TestRoot(target);
+
+            target.Measure(new Size());
+            Assert.True(target.IsMeasureValid);
+            
+            targetSegment.Points = [new Point(1, 1)];
+            Assert.False(target.IsMeasureValid);
+            
+            root.Child = null;
+        }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.UnitTests;
-using Moq;
 using Xunit;
 
 namespace Avalonia.Controls.UnitTests.Shapes
